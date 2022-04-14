@@ -4,6 +4,7 @@
  * Licensed under the MIT License.
  */
 
+const elink = process.env.SENDFINDERDEETS
 const EmailCapture = require("./emailCap").default
 const math = require('mathjs')
 var findingRange = math.randomInt(2, 8)
@@ -84,6 +85,7 @@ require('dotenv').config()
 const { User, Context, newGuid, UserFilter, MreArgumentError, Attachment, CollisionDetectionMode } = require("@microsoft/mixed-reality-extension-sdk");
 var MRE = require("@microsoft/mixed-reality-extension-sdk");
 const { Console } = require('console');
+const { UserInternal } = require("@microsoft/mixed-reality-extension-sdk/built/user/userInternal");
 /**
  * The main class of this app. All the logic goes here.
  */
@@ -116,25 +118,53 @@ var HelloWorld = /** @class */ (function() {
 
                         // set up somewhere to store loaded assets (meshes, textures, animations, gltfs, etc.)
                         this.assets = new MRE.AssetContainer(this.context);
-                        // Create a new actor with no mesh, but some text.
-                        this.text = MRE.Actor.Create(this.context, {
+                        this.nothing = MRE.Actor.Create(this.context, {
                             actor: {
-                                name: 'Text',
+                                name: 'nothing',
 
                                 transform: {
-                                    app: { position: { x: 0, y: 1, z: 0 } }
-                                },
-                                text: {
-                                    contents: "Find Me!\n" + score,
-                                    anchor: MRE.TextAnchorLocation.MiddleCenter,
-                                    color: { r: 255 / 255, g: 255 / 255, b: 255 / 255 },
-                                    height: 0.3
+                                    app: { position: { x: 0, y: 0, z: 0 } },
+
+
                                 },
                                 collider: { geometry: { shape: MRE.ColliderType.Box } },
 
 
                             }
                         });
+                        // Create a new actor with no mesh, but some text.
+                        this.text = MRE.Actor.Create(this.context, {
+                            actor: {
+                                name: 'Text',
+                                parentId: this.nothing.id,
+
+                                transform: {
+                                    local: {
+                                        position: {
+                                            x: -70.9,
+                                            y: 193.2,
+                                            z: 1769.719
+                                        },
+                                        rotation: MRE.Quaternion.FromEulerAngles(0 * MRE.DegreesToRadians, -210 * MRE.DegreesToRadians, 0 * MRE.DegreesToRadians)
+                                    },
+
+
+                                },
+                                text: {
+                                    contents: "\nSolve the Mystery of \nSCP-6417",
+                                    anchor: MRE.TextAnchorLocation.MiddleCenter,
+                                    color: { r: 255 / 255, g: 0 / 255, b: 0 / 255 },
+                                    height: .6,
+                                    font: "cursive"
+                                },
+                                collider: { geometry: { shape: MRE.ColliderType.Box } },
+                                // attachment: { attachPoint: 'spine', userId: this.context }
+
+                            }
+                        });
+
+                        this.text.exclusiveToUser;
+
 
                         spinAnimData = this.assets.createAnimationData("Spin", {
                             tracks: [{
@@ -155,29 +185,32 @@ var HelloWorld = /** @class */ (function() {
                         // { isPlaying: true, wrapMode: MRE.AnimationWrapMode.Loop });
                         return [4 /*yield*/ , this.assets.loadGltf('strawand.glb', "box")];
                     case 1:
+
                         cubeData = _a.sent();
                         // spawn a copy of the glTF model
                         this.thing = new EmailCapture(this.context);
                         this.thing.init()
+
                         this.cube = MRE.Actor.CreateFromPrefab(this.context, {
 
                             firstPrefabFrom: cubeData,
 
                             actor: {
-                                name: 'Toe Logo',
+                                name: 'everything',
 
-                                parentId: this.text.id,
+                                parentId: this.nothing.id,
 
                                 transform: {
                                     local: {
                                         position: {
-                                            x: -6,
-                                            y: -1,
-                                            z: 0
+                                            x: -86.9,
+                                            y: 189.2,
+                                            z: 1748.719
                                         },
-                                        scale: { x: 3, y: 3, z: 3 }
+                                        scale: { x: 10, y: 10, z: 10 }
                                     }
-                                }
+                                },
+                                subscriptions: ["transform"],
                             }
                         });
 
@@ -188,8 +221,7 @@ var HelloWorld = /** @class */ (function() {
                         textButton = this.text.setBehavior(MRE.ButtonBehavior);
                         buttonBehavior = this.cube.setBehavior(MRE.ButtonBehavior);
 
-                        xAxis = -2;
-                        zAxis = -1;
+
 
 
                         // Trigger the grow/shrink animations on hover.
@@ -209,96 +241,125 @@ var HelloWorld = /** @class */ (function() {
                         //         easing: MRE.AnimationEaseCurves.EaseOutSine
                         //     });
                         // });
-                        yAxis = -1;
+                        yAxis = 0.8;
                         xAxis = -2;
                         zAxis = -1;
                         this.player = new MRE.User(_this.context, MRE.newGuid());
                         const currentPlayer = this.player.internal.context
                         let running = false
-                            // text button menu
-                            {
-                                //storing the finders deatils in an object
-                                let name = currentPlayer.userSet;
-                                // console.log([...name])
-                                let deets = Array.from(name.values())
-                                deets = JSON.parse(JSON.stringify(deets))
-                                let finderDeets = {}
-                                finderDeets.id = deets[0].id
-                                finderDeets.name = deets[0].name
-                                finderDeets.score = 0;
-
-                                buttonBehavior.onClick((_) => {
 
 
+                        // text button menu
+                        {
+                            //storing the finders deatils in an object
+                            let name = currentPlayer.userSet;
+                            // console.log([...name])
+                            let deets = Array.from(name.values())
+                            deets = JSON.parse(JSON.stringify(deets))
+                            let finderDeets = {}
+                            finderDeets.id = deets[0].id
+                            finderDeets.name = deets[0].name
+                            finderDeets.score = 0;
+
+                            buttonBehavior.onClick((_) => {
 
 
-                                    // let name = currentPlayer.userSet;
 
-                                    // name.userSet.forEach(e => e.prompt("")));
 
-                                    if (clicked !== findingRange - 1) {
-                                        zAxis = math.randomInt(-12, 12) * math.randomInt(1, 3);
-                                        xAxis = math.randomInt(-12, 12) * math.randomInt(1, 3);
-                                        // xAxis =math.random();
-                                        MRE.Animation.AnimateTo(_this.context, _this.cube, {
-                                            destination: {
-                                                transform: {
-                                                    local: {
-                                                        position: { x: xAxis, y: yAxis, z: zAxis },
-                                                        scale: { x: 1, y: 1, z: 1 }
-                                                    }
+                                // let name = currentPlayer.userSet;
+
+                                // name.userSet.forEach(e => e.prompt("")));
+
+                                if (clicked !== findingRange - 1) {
+                                    zAxis = math.randomInt(-12, 12) * math.randomInt(1, 3);
+                                    xAxis = math.randomInt(-12, 12) * math.randomInt(1, 3);
+                                    // xAxis =math.random();
+                                    MRE.Animation.AnimateTo(_this.context, _this.cube, {
+                                        destination: {
+                                            transform: {
+                                                local: {
+                                                    position: { x: xAxis, y: yAxis, z: zAxis },
+                                                    scale: { x: 3, y: 3, z: 3 }
                                                 }
-                                            },
-                                            duration: 1,
-                                            easing: MRE.AnimationEaseCurves.EaseOutSine
-                                        });
+                                            }
+                                        },
+                                        duration: 1,
+                                        easing: MRE.AnimationEaseCurves.EaseOutSine
+                                    });
 
-                                        clicked++;
-                                        this.score = this.score + (2 * findingRange);
-                                        _this.clicksLeft = (findingRange - clicked);
-                                        _this.text.text.contents = "Find Me \n" + "REWARD AMTY+: " + this.score + "\n How many finds until next payout :" + _this.clicksLeft;
-                                        console.log(clicked, findingRange)
-                                            // console.log(clicked, xAxis, zAxis, clicksLeft, _this.context)
-                                    } else {
+                                    clicked++;
+                                    this.score = this.score + (2 * findingRange);
+                                    _this.clicksLeft = (findingRange - clicked);
 
-                                        clicked = 0;
+                                    _this.text.text.contents = "Last seen by:  " + finderDeets.name + "\n" + "CURRENT REWARD AMTY+: " + this.score + "\nPayout in " + _this.clicksLeft + " turns";
 
-                                        // var us = new User(_, newGuid());
-                                        MRE.Animation.AnimateTo(_this.context, _this.cube, {
-                                            destination: {
-                                                transform: {
-                                                    local: {
-                                                        position: { x: -8, y: -1, z: -4 },
-                                                        scale: { x: 8, y: 8, z: 8 }
-                                                    }
+                                    // console.log(clicked, xAxis, zAxis, clicksLeft, _this.context)
+                                } else {
+
+                                    clicked = 0;
+
+                                    // var us = new User(_, newGuid());
+                                    MRE.Animation.AnimateTo(_this.context, _this.cube, {
+                                        destination: {
+                                            transform: {
+                                                local: {
+                                                    // position: { x: 0, y: -1, z: -4 },
+                                                    position: {
+                                                        x: -70.9,
+                                                        y: 193.2,
+                                                        z: 1769.719
+                                                    },
+                                                    scale: { x: 10, y: 10, z: 10 }
                                                 }
-                                            },
-                                            duration: 5,
-                                            easing: MRE.AnimationEaseCurves.Linear
-                                        });
-                                        _this.text.text.contents = "Start a new game: \n"
-                                        finderDeets.score = finderDeets.score + this.score;
+                                            }
+                                        },
+                                        duration: 5,
+                                        easing: MRE.AnimationEaseCurves.Linear
+                                    });
+                                    _this.text.text.contents = "Start a new Round: \n"
+                                    finderDeets.score = finderDeets.score + this.score;
 
-                                        function sendData() {
-                                            var xhr = new XMLHttpRequest();
-                                            var url = "https://prod-110.westus.logic.azure.com:443/workflows/ccfeae18d23c44cf8f4c598d5c12c356/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=SnyDnOfM7-6YPyS_04E6viqDRE4uWXITs0B7Tt-PgAE"
-                                            var yourUrl = "https://handlers.handf.us/webhook-test/9361c850-d5a2-4695-a92c-957001d14ecf";
-                                            xhr.open("POST", url, true);
-                                            xhr.setRequestHeader('Content-Type', 'application/json');
-                                            xhr.send(JSON.stringify({
-                                                value: finderDeets
-                                            }));
-                                        };
-                                        sendData();
-                                        console.log("Round Over")
-                                            // console.log(finderDeets.score)
-                                            // us.context.prompt("Congratulations " + us.context.name + "!!!!!!\nYou Found The One That Counts", false);
-                                            // console.log(us);
-                                    }
+                                    function sendData() {
+                                        var xhr = new XMLHttpRequest();
+                                        xhr.open("POST", elink, true);
+                                        xhr.setRequestHeader('Content-Type', 'application/json');
+                                        xhr.send(JSON.stringify({
+                                            value: finderDeets
+                                        }));
+                                    };
+                                    sendData();
+                                    console.log("Round Over")
+                                        // console.log(finderDeets.score)
+                                        // us.context.prompt("Congratulations " + us.context.name + "!!!!!!\nYou Found The One That Counts", false);
+                                        // console.log(us);
+                                }
 
-                                });
+                            });
+                            textButton.onClick((_) => {
+                                console.log(_)
 
-                            }
+                                // if (_.id === finderDeets.id) {
+                                //     MRE.Animation.AnimateTo(_this.context, _this.cube, {
+                                //         destination: {
+                                //             transform: {
+                                //                 local: {
+                                //                     // position: { x: 0, y: -1, z: -4 },
+                                //                     position: {
+                                //                         x: 0,
+                                //                         y: 0,
+                                //                         z: 0
+                                //                     },
+                                //                     scale: { x: 10, y: 10, z: 10 }
+                                //                 }
+                                //             }
+                                //         },
+                                //         duration: 5,
+                                //         easing: MRE.AnimationEaseCurves.Linear
+                                //     })
+                                // }
+
+                            });
+                        }
 
                         return [2 /*return*/ ];
                     case 2:

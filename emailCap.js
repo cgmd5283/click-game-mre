@@ -1,8 +1,10 @@
 const MRE = (require("@microsoft/mixed-reality-extension-sdk"));
 const node_fetch_1 = require("axios");
-// import * as node_fetch_1 from "node-fetch";
+require("dotenv").config();
+const slink = process.env.SENDPLAYERSIGNUP
+
 async function sendInfo(_userId, _email) {
-    const response = await node_fetch_1.default.post("https://prod-100.westus.logic.azure.com:443/workflows/17eb83324cb3449195cd98f89640e0c6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LR2c2jGYVrqTI2MSQhTPQFgcCAgMSmEId8Hg8FvF9FM", { id: _userId, email: _email });
+    const response = await node_fetch_1.default.post(slink, { id: _userId, email: _email });
     // eslint-disable-next-line no-console
     return response.status
 }
@@ -21,7 +23,7 @@ class EmailCapture {
             this.rotation = null;
             this.buttonActor = null;
             this.labelActor = null;
-            this.labelText = "Click For more info!\n";
+            this.labelText = "^\n|\nWe need your email\nTo send rewards!";
             this.context.onStarted(() => this.init());
         }
         ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,9 +72,14 @@ class EmailCapture {
             alphaMode: MRE.AlphaMode.Blend
         });
         // Meshes
-        this.buttonMesh = this.assets.createBoxMesh('buttonMesh', .15, .15, .15);
+        this.buttonMesh = this.assets.createBoxMesh('buttonMesh', .11, .11, .11);
         // Create Button
-        this.position = { x: 0.0, y: 0.0, z: 0.0 };
+        // this.position = { x: 8.54, y: 33.5, z: 72 };
+        this.position = {
+            x: -38.7,
+            y: 95.6,
+            z: 888.5
+        };
         this.rotation = MRE.Quaternion.FromEulerAngles(0 * MRE.DegreesToRadians, 0 * MRE.DegreesToRadians, 0 * MRE.DegreesToRadians);
         this.buttonActor = MRE.Actor.Create(this.context, {
             actor: {
@@ -83,8 +90,13 @@ class EmailCapture {
             }
         });
         // Add Text Label
-        this.position = { x: 0, y: .35, z: 0 };
-        this.rotation = MRE.Quaternion.FromEulerAngles(0 * MRE.DegreesToRadians, 0 * MRE.DegreesToRadians, 0 * MRE.DegreesToRadians);
+        // this.position = { x: 8.54, y: 33.4, z: 72 };
+        this.position = this.position = {
+            x: -38.7,
+            y: 95.45,
+            z: 888.5
+        };
+        this.rotation = MRE.Quaternion.FromEulerAngles(0 * MRE.DegreesToRadians, -90 * MRE.DegreesToRadians, 0 * MRE.DegreesToRadians);
         this.labelActor = MRE.Actor.Create(this.context, {
             actor: {
                 name: 'Button Label',
